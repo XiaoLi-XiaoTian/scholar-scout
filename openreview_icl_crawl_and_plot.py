@@ -54,7 +54,7 @@ ICL_REGEX = re.compile("|".join(ICL_TERMS), flags=re.IGNORECASE)
 
 
 # ----------------------------
-# 2) Taxonomy
+# 2) Taxonomy - 基于ICL研究核心问题的分类体系
 # ----------------------------
 @dataclass(frozen=True)
 class Category:
@@ -63,74 +63,164 @@ class Category:
     patterns: Tuple[str, ...]
 
 
-A_MECH_THEORY = Category(
-    "A_mech_theory",
-    "🧠 A 机理与理论",
+# 1. Prompt工程与优化（合并原B1、B2）
+PROMPT_ENGINEERING = Category(
+    "prompt_eng",
+    "📚 Prompt工程与优化",
     (
-        r"\btheor\w*|\bprovab\w*|\bmechanis\w*|\bdynamics?\b|\binduction head(s)?\b",
-        r"\bcircuit(s)?\b|\binterpret\w*|\bassociative memory\b|\bhopfield\b",
-        r"\bmeta[- ]learn\w*|\bgradient descent\b|\bimplicit\b",
+        r"\bprompt (engineering|design|optimization|learning|tuning)\b",
+        r"\bexample selection\b|\bdemonstration selection\b|\bexemplar selection\b",
+        r"\bselect(ing)? (examples|demonstrations|exemplars)\b",
+        r"\bprompt ordering\b|\border(ing)? demonstrations\b|\bpermutation\b",
+        r"\bcompose(d)? demonstrations\b|\bstructure(d)? prompt\b",
+        r"\bretrieve demonstrations\b|\bfew[- ]shot (example|prompt)\b",
+        r"\btemplate\b.*\b(design|optimization)\b|\binstruction (following|tuning)\b",
     ),
 )
 
-B_DEMO_SELECT = Category("B_demo_select", "🧩 B1 示例选择/筛选", (
-    r"\bexample selection\b|\bdemonstration selection\b|\bexemplar selection\b|\bretrieve demonstrations\b",
-    r"\bselect(ing)? (examples|demonstrations|exemplars)\b|\bfilter(ing)? (examples|demonstrations)\b",
-))
-B_DEMO_ORDER = Category("B_demo_order", "🧩 B2 示例排序/结构化", (
-    r"\bprompt ordering\b|\border(ing)? demonstrations\b|\bpermutation\b|\bcurriculum\b",
-    r"\bcompose(d)? demonstrations\b|\bstructure(d)? prompt\b",
-))
-B_COT_REASON = Category("B_cot_reason", "🧩 B3 CoT/多步推理/Many-shot Reasoning", (
-    r"\bchain[- ]of[- ]thought\b|\bCoT\b|\bscratchpad\b|\bdeliberat\w*|\bself[- ]consistency\b",
-    r"\bmultistep\b|\breason(er|ing)\b|\bmany[- ]shot\b|\bmany[- ]step\b",
-))
-B_KNN_NONPARAM = Category("B_knn_nonparam", "🧩 B4 近邻/非参数式 ICL 推断", (
-    r"\bnearest neighbor\b|\b(k[- ]?nn|kNN)\b|\bnonparametric\b|\bprototype(s)?\b",
-    r"\bcalibration[- ]free\b|\bembedding[- ]based inference\b|\bvector database\b",
-))
-B_MISTAKE_PRINCIPLE = Category("B_mistake_principle", "🧩 B5 从错误学习/原则归纳", (
-    r"\bmistake(s)?\b|\berror(s)?\b|\bcounterexample(s)?\b|\bfrom mistakes\b",
-    r"\bprinciple learning\b|\brule induction\b|\bself[- ]correction\b",
-))
-B_CALIB_UQ = Category("B_calib_uq", "🧩 B6 校准/不确定性/拒答", (
-    r"\bcalibrat\w*|\buncertaint\w*|\bconfidence\b|\breliabilit\w*\b",
-    r"\bselective prediction\b|\babstain\b|\breject option\b",
-))
+# 2. 推理与思维链（原B3）
+REASONING_COT = Category(
+    "reasoning_cot",
+    "🧠 推理与思维链",
+    (
+        r"\bchain[- ]of[- ]thought\b|\bCoT\b|\bscratchpad\b",
+        r"\bself[- ]consistency\b|\btree[- ]of[- ]thought\b|\bgraph[- ]of[- ]thought\b",
+        r"\bmultistep\b|\bmulti[- ]step\b|\bmultiple step\b",
+        r"\breason(er|ing)\b.*\b(trace|path|step|chain|process)\b",
+        r"\bdeliberat(e|ion)\b|\bthought (generation|process)\b",
+        r"\bmany[- ]shot\b|\bmany[- ]step\b",
+        r"\bintermediate (reasoning|step|output)\b|\bstep[- ]by[- ]step\b",
+        r"\bcomplex reasoning\b|\blogical reasoning\b|\bmathematical reasoning\b",
+    ),
+)
 
-C_CTX_COMPRESS = Category("C_ctx_compress", "📏 C1 上下文压缩/蒸馏/记忆化", (
-    r"\bcontext compression\b|\bcompress(ion|ing)?\b|\bdistill(at|ation)\w*\b",
-    r"\b(in[- ]context )?autoencoder\b|\bprompt compression\b|\bcontext distillation\b",
-))
-C_CACHE_EFFIC = Category("C_cache_effic", "📏 C2 推理效率/KV Cache/高效注意力", (
-    r"\bkv cache\b|\bkey[- ]value\b|\bcache\b|\bprefill\b|\bthroughput\b|\blatency\b",
-    r"\befficient attention\b|\blinear attention\b|\bflash[- ]?attention\b",
-))
-C_LEN_EXTRAP = Category("C_len_extrap", "📏 C3 长度泛化/长短对齐/长度外推", (
-    r"\blength generaliz\w*\b|\blength extrapolat\w*\b|\btrain short\b|\binfer long\b",
-    r"\blong[- ]short\b|\bcontext length generaliz\w*\b|\bpositional extrapolat\w*\b",
-))
+# 3. 机理理解与可解释性（原A + 部分F）
+MECHANISM_THEORY = Category(
+    "mechanism_theory",
+    "🔬 机理理解与可解释性",
+    (
+        r"\btheor(y|etical)\b.*\b(ICL|in[- ]context)\b",
+        r"\bmechanis\w*\b.*\b(ICL|in[- ]context)\b",
+        r"\binduction head(s)?\b|\bcircuit(s)?\b.*\b(analysis|discover)\b",
+        r"\binterpretab\w*|\bexplainab\w*|\bunderstanding\b.*\b(ICL|in[- ]context)\b",
+        r"\bassociative memory\b|\bhopfield\b|\bmeta[- ]learn\w*",
+        r"\bimplicit (learning|gradient)\b|\bin[- ]weights\b",
+        r"\bprovab\w*|\bconvergence\b|\blearning dynamics\b",
+        r"\battribution\b|\bprobe\b|\bdiagnostic\b.*\bICL\b",
+    ),
+)
 
-D_TRAIN_ARCH = Category("D_train_arch", "🏗️ D 训练/架构/预训练范式", (
-    r"\bpretrain\w*\b|\btraining\b|\barchitecture\b|\bstate space\b|\bxLSTM\b|\bmamba\b",
-    r"\bsequence model(ing)?\b|\bmixture of experts\b|\battention variant\b",
-))
-E_AGENT_PLANNING = Category("E_agent_planning", "🤖 E Agent/规划/工具", (
-    r"\bagent(s)?\b|\bplanning\b|\btool use\b|\baction sequence\b|\btrajectory\b|\breasoning and acting\b",
-))
-F_EVAL_BENCH = Category("F_eval_bench", "📊 F 评测/基准/诊断", (
-    r"\bbenchmark\b|\bevaluation\b|\btestbed\b|\bdiagnostic\b|\bprobe\b|\bablation\b|\bmeasure\b",
-))
-G_SAFETY_PRIVACY = Category("G_safety_privacy", "🛡️ G 安全/隐私/遗忘", (
-    r"\bunlearning\b|\bforget(ting)?\b|\bprivacy\b|\bdata leakage\b|\battack\b|\bbackdoor\b",
-    r"\bjailbreak\b|\bwatermark\b|\bsafety\b|\brefusal\b",
-))
+# 4. 模型训练与架构（精简后的D）
+MODEL_TRAINING = Category(
+    "model_training",
+    "🏗️ 模型训练与架构",
+    (
+        r"\bpretrain\w*\b|\bfine[- ]tun\w*\b|\btraining\b",
+        r"\barchitecture\b|\bmodel design\b|\bneural architecture\b",
+        r"\bstate space model\b|\bxLSTM\b|\bmamba\b|\bretention\b",
+        r"\bsequence model(ing)?\b|\bmixture of experts\b|\bMoE\b",
+        r"\btransformer (variant|architecture|model)\b",
+        r"\battention (mechanism|variant|pattern|head)\b",
+        r"\bposition(al)? (encoding|embedding|interpolation)\b",
+        r"\blayer (normalization|norm)\b|\bactivation function\b",
+        r"\bmodel (scaling|size|capacity|parameter)\b",
+        r"\bbackbone\b|\bfoundation model\b|\blarge language model\b.*\barchitecture\b",
+    ),
+)
+
+# 5. 效率优化（合并C1、C2、C3）
+EFFICIENCY = Category(
+    "efficiency",
+    "⚡ 效率优化",
+    (
+        r"\bcontext compression\b|\bprompt compression\b",
+        r"\bcompress(ion|ing)?\b.*\b(ICL|context|prompt)\b",
+        r"\bdistill(at|ation)\w*\b.*\b(ICL|context|in[- ]context)\b",
+        r"\b(in[- ]context )?autoencoder\b|\bcontext distillation\b",
+        r"\bkv cache\b|\bkey[- ]value cache\b|\bcache\b.*\boptimization\b",
+        r"\bprefill\b|\bthroughput\b|\blatency\b.*\b(optimization|reduction)\b",
+        r"\befficient (attention|inference)\b|\blinear attention\b|\bflash[- ]?attention\b",
+        r"\blength generaliz\w*\b|\blength extrapolat\w*\b",
+        r"\btrain short.*infer long\b|\blong[- ]short\b",
+        r"\bcontext length\b.*\b(generaliz\w*|extrapolat\w*|extension)\b",
+        r"\bpositional extrapolat\w*\b|\bRoPE\b.*\bscaling\b",
+    ),
+)
+
+# 6. 评测基准与数据集（精简后的F）
+EVALUATION = Category(
+    "evaluation",
+    "📊 评测基准与数据集",
+    (
+        r"\bbenchmark\b.*\b(ICL|in[- ]context|few[- ]shot)\b",
+        r"\b(evaluation|testbed|dataset)\b.*\b(ICL|in[- ]context|few[- ]shot)\b",
+        r"\bnew (benchmark|dataset|task)\b",
+        r"\bmeasure\b|\bmetric\b.*\b(ICL|in[- ]context)\b",
+        r"\bablation (study|experiment)\b|\bempirical (study|analysis)\b",
+        r"\bsurvey\b|\bliterature review\b",
+    ),
+)
+
+# 7. 应用：Agent与工具使用（原E）
+APPLICATION_AGENT = Category(
+    "application_agent",
+    "🤖 应用：Agent与工具使用",
+    (
+        r"\bagent(s)?\b.*\b(ICL|in[- ]context|few[- ]shot)\b",
+        r"\bplanning\b.*\b(agent|ICL|in[- ]context)\b",
+        r"\btool (use|usage|calling|learning)\b",
+        r"\bfunction calling\b|\bAPI (call|usage)\b",
+        r"\baction (sequence|selection)\b|\btrajectory\b",
+        r"\breasoning and acting\b|\bReAct\b",
+        r"\baudited reasoning\b|\bemergent abilit\w*\b",
+    ),
+)
+
+# 8. 可靠性与安全（合并B6和G）
+RELIABILITY_SAFETY = Category(
+    "reliability_safety",
+    "🛡️ 可靠性与安全",
+    (
+        r"\bcalibrat\w*|\buncertaint\w*|\bconfidence (estimation|calibration)\b",
+        r"\breliabilit\w*\b|\brobust\w*\b.*\b(ICL|in[- ]context)\b",
+        r"\bselective prediction\b|\babstain\b|\breject option\b",
+        r"\bunlearning\b|\bforget(ting)?\b|\bmachine unlearning\b",
+        r"\bprivacy\b.*\b(ICL|in[- ]context)\b|\bdata leakage\b",
+        r"\battack\b.*\b(ICL|prompt)\b|\bbackdoor\b|\badversarial\b",
+        r"\bjailbreak\b|\bprompt injection\b",
+        r"\bwatermark\b|\bsafety\b|\brefusal\b",
+        r"\bhallucination\b|\bfaithful\w*\b",
+    ),
+)
+
+# 9. 特定技术方法（原B4、B5等）
+SPECIFIC_METHODS = Category(
+    "specific_methods",
+    "🎯 特定技术方法",
+    (
+        r"\bnearest neighbor\b|\b(k[- ]?nn|kNN)\b.*\b(ICL|in[- ]context)\b",
+        r"\bnonparametric\b.*\b(ICL|learning)\b|\bprototype(s)?\b",
+        r"\bcalibration[- ]free\b|\bembedding[- ]based inference\b",
+        r"\bvector database\b|\bretrieval[- ]augmented\b",
+        r"\bmistake(s)?\b.*\b(learning|correction)\b",
+        r"\berror(s)?\b.*\b(analysis|learning|feedback)\b",
+        r"\bcounterexample(s)?\b|\bfrom mistakes\b",
+        r"\bprinciple learning\b|\brule induction\b",
+        r"\bself[- ]correction\b|\bself[- ]refinement\b|\bself[- ]improvement\b",
+        r"\bcontrastive\b.*\b(ICL|learning)\b|\bsymbol tuning\b",
+    ),
+)
 
 CATEGORY_PRIORITY: List[Category] = [
-    G_SAFETY_PRIVACY, F_EVAL_BENCH, E_AGENT_PLANNING,
-    C_CTX_COMPRESS, C_CACHE_EFFIC, C_LEN_EXTRAP,
-    B_DEMO_SELECT, B_DEMO_ORDER, B_COT_REASON, B_KNN_NONPARAM, B_MISTAKE_PRINCIPLE, B_CALIB_UQ,
-    D_TRAIN_ARCH, A_MECH_THEORY
+    EVALUATION,           # 优先识别评测类（避免被其他类误判）
+    APPLICATION_AGENT,    # Agent应用（特征明显）
+    REASONING_COT,        # 推理与CoT（特征明显）
+    PROMPT_ENGINEERING,   # Prompt工程
+    SPECIFIC_METHODS,     # 特定方法（避免被大类吸收）
+    EFFICIENCY,           # 效率优化
+    RELIABILITY_SAFETY,   # 可靠性与安全
+    MECHANISM_THEORY,     # 机理理论
+    MODEL_TRAINING,       # 模型训练（最后，避免过度匹配）
 ]
 DEFAULT_LABEL = "🧺 其他/未归类"
 
