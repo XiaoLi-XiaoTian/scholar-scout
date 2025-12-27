@@ -1,0 +1,46 @@
+# 配置文件（包含敏感信息，不应提交到版本控制）
+config.json
+
+# Python 编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 测试和缓存文件
+*.cache
+*.json.bak
+test_llm_cache.json
+reclassify_cache.json
+reclassify_checkpoint.json
+*_checkpoint.json
+llm_cache.json
+
+# 输出文件（可选：如果不想提交生成的数据）
+# out/
+# *.csv
+# *.png
+
+# IDE 和编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 环境变量文件
+.env
+.env.local
+
+# 日志文件
+*.log
