@@ -60,7 +60,7 @@
 
 ```bash
 # 1. 克隆仓库
-git clone <repository-url>
+git clone https://github.com/XiaoLi-XiaoTian/scholar-scout.git
 cd scholar-scout
 
 # 2. 安装依赖
